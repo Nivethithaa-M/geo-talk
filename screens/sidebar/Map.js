@@ -1,23 +1,27 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { StyleSheet,TextInput,TouchableOpacity, View, Dimensions } from "react-native";
+import { StyleSheet,TextInput,TouchableOpacity, View, Dimensions,Alert} from "react-native";
 import MapView, { Marker, Circle } from "react-native-maps";
 import * as Location from 'expo-location';
 import { FontAwesome5,MaterialIcons } from "@expo/vector-icons";
-
+import {auth,app,fireStore,firebase} from "../../firebase"
 const { width, height } = Dimensions.get("screen");
 const LATDELTA = 0.017
 const LNGDELTA = 0.017
-
+const db = app.database();
 const Map = (props) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [messages, setMessages] = useState("");
   const [mapRegion, setMapRegion] = useState({
     longitude: 80.23539830006482,
     latitude: 13.01107648890877,
     longitudeDelta: LNGDELTA,
     latitudeDelta: LATDELTA
   });
+  const sendmessage = async()=> {
+    fireStore.collection('chat').doc(auth.currentUser.email).collection('messages').add({messages,mapRegion,timestamp : firebase.firestore.FieldValue.serverTimestamp() })
+  }
   const [friends] = useState([
     {
       title: "bob",
@@ -100,8 +104,8 @@ const Map = (props) => {
               longitude: mapRegion.longitude,
               latitude: mapRegion.latitude
             }}
-            title="Me"
-            description="Myself"
+            title={auth.currentUser.email}
+            description={messages}
           >
           </Marker>
         ) : null}
@@ -119,8 +123,9 @@ const Map = (props) => {
           <TextInput
             style={styles.input}
             placeholder="Type your message here"
+            onChangeText={setMessages}
           />
-            <MaterialIcons style={styles.sendButton} name="send" size={32} color="#fe4027" />
+            <MaterialIcons style={styles.sendButton} onPress={() => sendmessage()} name="send" size={32} color="#fe4027" />
         </View>
     </View>
   );
