@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Geotalk",
-    "slug": "Geotalk",
-    "version": "1.0.0",
+    "slug": "geo-talk",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -13,17 +13,19 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.geotalk.geotalk",
+      "buildNumber": "1.0.5"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.geotalk",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"

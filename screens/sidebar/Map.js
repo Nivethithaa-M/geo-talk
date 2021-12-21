@@ -64,27 +64,48 @@ const Map = (props) => {
   };
 
   const getFriendsLatestMessage = async () => {
-    const chatRef = await fireStore.collection('chat').get();
+    // const chatRef = await fireStore.collection('chat').get();
 
-    chatRef.forEach((doc) => {
-      doc.ref
-        .collection('messages')
-        .orderBy('timestamp', 'desc')
-        .limit(1)
-        .get()
-        .then((snapshot) => {
-          let latestMessages = [];
-          snapshot.forEach((docu) => {
-            if (doc.id !== auth.currentUser.email) {
-              latestMessages.push(docu.data());
-            }
+    // chatRef.forEach((doc) => {
+    //   doc.ref
+    //     .collection('messages')
+    //     .orderBy('timestamp', 'desc')
+    //     .limit(1)
+    //     .onSnapshot((snap) => {
+    //       let latestMessages = [];
+    //       snap.forEach((docu) => {
+    //         console.log('docu', docu.data());
+    //         if (doc.id !== auth.currentUser.email) {
+    //           latestMessages.push(docu.data());
+    //         }
+    //       });
+    //       setFriends(latestMessages);
+    //     });
+    // });
+
+    fireStore.collection('chat').onSnapshot((snapshot) => {
+      let latestMessages = [];
+      snapshot.forEach((doc) => {
+        // console.log('doc', doc.data());
+        doc.ref
+          .collection('messages')
+          .orderBy('timestamp', 'desc')
+          .limit(1)
+          .onSnapshot((snap) => {
+            // let latestMessages = [];
+            snap.forEach((docu) => {
+              // console.log('docu', docu.data());
+              if (doc.id !== auth.currentUser.email) {
+                latestMessages.push(docu.data());
+              }
+            });
+            setFriends(latestMessages);
           });
-          setFriends(latestMessages);
-        });
+      });
     });
   };
 
-  console.log(friends);
+  console.log('friends', friends);
 
   const sendmessage = async () => {
     await fireStore
