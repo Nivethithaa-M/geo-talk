@@ -23,9 +23,11 @@ const Map = (props) => {
     latitudeDelta: LATDELTA,
   });
   const [description, setDescription] = useState('');
+  const [friends, setFriends] = useState([]);
 
   useEffect(() => {
     getCurrentUserLatestMessage();
+    getFriendsLatestMessage();
   }, []);
 
   useEffect(() => {
@@ -61,57 +63,41 @@ const Map = (props) => {
       });
   };
 
+  const getFriendsLatestMessage = async () => {
+    const chatRef = await fireStore.collection('chat').get();
+
+    chatRef.forEach((doc) => {
+      doc.ref
+        .collection('messages')
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .get()
+        .then((snapshot) => {
+          let latestMessages = [];
+          snapshot.forEach((docu) => {
+            if (doc.id !== auth.currentUser.email) {
+              latestMessages.push(docu.data());
+            }
+          });
+          setFriends(latestMessages);
+        });
+    });
+  };
+
+  console.log(friends);
+
   const sendmessage = async () => {
-    fireStore
+    await fireStore
       .collection('chat')
       .doc(auth.currentUser.email)
       .collection('messages')
       .add({
+        title: auth.currentUser.email,
         messages,
         mapRegion,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       });
   };
-
-  // TODO: retireve all messages from firebase
-  const friends = [
-    {
-      title: 'bob',
-      messsage: 'guindy park',
-      icon: 'dog',
-      location: {
-        longitude: 80.2378081241749,
-        latitude: 13.005155071011641,
-      },
-    },
-    {
-      title: 'Alex',
-      messsage: 'Childhood friend',
-      icon: 'dragon',
-      location: {
-        longitude: 80.2381648579569,
-        latitude: 13.007708359268626,
-      },
-    },
-    {
-      title: 'Jack',
-      messsage: 'Business Partner',
-      icon: 'dove',
-      location: {
-        longitude: 80.22799707958029,
-        latitude: 13.015214374137933,
-      },
-    },
-    {
-      title: 'rose',
-      messsage: 'coffee',
-      icon: 'cat',
-      location: {
-        longitude: 80.23329712442346,
-        latitude: 13.013510494203762,
-      },
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -136,7 +122,7 @@ const Map = (props) => {
             }}
           >
             <CustomMarker
-              title={auth.currentUser.email.split('@')[0].toUpperCase()} // TODO: capitalize first letter
+              title={auth.currentUser.email}
               description={description}
             />
           </Marker>
@@ -147,15 +133,15 @@ const Map = (props) => {
               <Marker
                 key={i}
                 coordinate={{
-                  ...friend.location,
-                  longitudeDelta: LNGDELTA,
-                  latitudeDelta: LATDELTA,
+                  ...friend.mapRegion,
+                  // longitudeDelta: LNGDELTA,
+                  // latitudeDelta: LATDELTA,
                 }}
               >
                 <CustomMarker
                   title={friend.title}
-                  description={friend.messsage}
-                  icon={friend.icon}
+                  description={friend.messsages}
+                  icon='dove'
                 />
               </Marker>
             ))
