@@ -64,48 +64,26 @@ const Map = (props) => {
   };
 
   const getFriendsLatestMessage = async () => {
-    // const chatRef = await fireStore.collection('chat').get();
-
-    // chatRef.forEach((doc) => {
-    //   doc.ref
-    //     .collection('messages')
-    //     .orderBy('timestamp', 'desc')
-    //     .limit(1)
-    //     .onSnapshot((snap) => {
-    //       let latestMessages = [];
-    //       snap.forEach((docu) => {
-    //         console.log('docu', docu.data());
-    //         if (doc.id !== auth.currentUser.email) {
-    //           latestMessages.push(docu.data());
-    //         }
-    //       });
-    //       setFriends(latestMessages);
-    //     });
-    // });
-
     fireStore.collection('chat').onSnapshot((snapshot) => {
-      let latestMessages = [];
       snapshot.forEach((doc) => {
-        // console.log('doc', doc.data());
-        doc.ref
-          .collection('messages')
-          .orderBy('timestamp', 'desc')
-          .limit(1)
-          .onSnapshot((snap) => {
-            // let latestMessages = [];
-            snap.forEach((docu) => {
-              // console.log('docu', docu.data());
-              if (doc.id !== auth.currentUser.email) {
+        if (doc.id !== auth.currentUser.email) {
+          fireStore
+            .collection('chat')
+            .doc(doc.id)
+            .collection('messages')
+            .orderBy('timestamp', 'desc')
+            .limit(1)
+            .onSnapshot((snap) => {
+              let latestMessages = [];
+              snap.forEach((docu) => {
                 latestMessages.push(docu.data());
-              }
+              });
+              setFriends(latestMessages);
             });
-            setFriends(latestMessages);
-          });
+        }
       });
     });
   };
-
-  console.log('friends', friends);
 
   const sendmessage = async () => {
     await fireStore
@@ -123,7 +101,14 @@ const Map = (props) => {
   return (
     <View style={styles.container}>
       <StatusBar style='auto' />
-      <MapView initialRegion={mapRegion} style={styles.mapView}>
+      <MapView
+        initialRegion={mapRegion}
+        style={styles.mapView}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
+        showsCompass={true}
+        showsScale={true}
+      >
         {mapRegion ? (
           <Circle
             center={{
@@ -150,22 +135,25 @@ const Map = (props) => {
         ) : null}
 
         {friends
-          ? friends.map((friend, i) => (
-              <Marker
-                key={i}
-                coordinate={{
-                  ...friend.mapRegion,
-                  // longitudeDelta: LNGDELTA,
-                  // latitudeDelta: LATDELTA,
-                }}
-              >
-                <CustomMarker
-                  title={friend.title}
-                  description={friend.messsages}
-                  icon='dove'
-                />
-              </Marker>
-            ))
+          ? friends.map((friend, i) => {
+              console.log('friend', friend);
+              return (
+                <Marker
+                  key={i}
+                  coordinate={{
+                    ...friend.mapRegion,
+                    // longitudeDelta: LNGDELTA,
+                    // latitudeDelta: LATDELTA,
+                  }}
+                >
+                  <CustomMarker
+                    title={friend.title}
+                    description={friend.messages}
+                    icon='dove'
+                  />
+                </Marker>
+              );
+            })
           : null}
       </MapView>
       <View style={styles.inputWrapper}>
