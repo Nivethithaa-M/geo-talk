@@ -15,11 +15,11 @@ export default function ChatHistory() {
           .doc(doc.id)
           .collection('messages')
           .orderBy('timestamp', 'desc')
-          .limit(2)
+          .limit(1)
           .onSnapshot((querySnapshot) => {
             const threads = querySnapshot.docs.map((docSnap) => {
               return {
-                // ...docSnap.data(),
+                ...docSnap.data(),
                 _id: docSnap.id,
                 text: docSnap.data().messages,
                 createdAt: docSnap.data().timestamp.toDate(),
